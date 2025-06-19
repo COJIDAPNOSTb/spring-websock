@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>Spring Boot WebSocket</title>
+    <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+<noscript>
+    <h2>Your browser doesn't support Javascript</h2>
+</noscript>
+
+<div id="auth-page">
+    <div class="auth-container">
+        <h1 class="title">Login or Register</h1>
+        <form id="authForm">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" autocomplete="off" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <button type="submit" id="loginBtn" class="accent">Login</button>
+                <button type="button" id="registerBtn" class="primary">Register</button>
+            </div>
+            <div class="form-group">
+                <p id="authMessage" class="error"></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="chat-page" class="hidden">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Spring WebSocket</h2>
+        </div>
+        <div class="connecting">
+            Connecting...
+        </div>
+        <ul id="messageArea"></ul>
+        <form id="messageForm" name="messageForm">
+            <div class="form-group">
+                <div class="input-group clearfix">
+                    <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
+                    <button type="submit" class="primary">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const authMessage = document.getElementById('authMessage');
+
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+
+    const showMessage = (msg, isError = true) => {
+        authMessage.textContent = msg;
+        authMessage.style.color = isError ? 'red' : 'green';
+    };
+
+    const sendAuthRequest = async (endpoint) => {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        if (!username || !password) return showMessage("Enter username and password");
+
+        try {
+            const response = await fetch(`/api/auth/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Ошибка запроса");
+            }
+
+            if (endpoint === 'login') {
+                const data = await response.json();
+                localStorage.setItem('jwt', data.token);
+                localStorage.setItem('username', username);
+                document.getElementById('auth-page').classList.add('hidden');
+                document.getElementById('chat-page').classList.remove('hidden');
+                connect();
+
+            } else {
+                showMessage("Register success", false);
+            }
+        } catch (err) {
+            showMessage(err.message);
+        }
+    };
+
+    loginBtn.onclick = (e) => {
+        e.preventDefault();
+        sendAuthRequest('login');
+    };
+
+    registerBtn.onclick = (e) => {
+        e.preventDefault();
+        sendAuthRequest('register');
+    };
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

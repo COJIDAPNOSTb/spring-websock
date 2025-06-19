@@ -18,12 +18,25 @@ var colors = [
 
 function connect() {
     username = localStorage.getItem('username');
+
     if (!username) {
         window.location.reload();
         return;
     }
 
-    var socket = new SockJS('/ws');
+    // Отключим старый клиент, если был
+    if (stompClient && stompClient.connected) {
+        stompClient.disconnect(() => {
+            console.log("Previous WebSocket connection closed.");
+            doConnect(); // делаем новое подключение
+        });
+    } else {
+        doConnect();
+    }
+}
+
+function doConnect() {
+    const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, onConnected, onError);
 }

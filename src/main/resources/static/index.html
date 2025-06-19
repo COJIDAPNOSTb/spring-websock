@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Spring Boot WebSocket</title>
+    <title>Spring Boot WebSocket Chat Application</title>
     <link rel="stylesheet" href="/css/main.css" />
 </head>
 <body>
@@ -35,6 +35,7 @@
     <div class="chat-container">
         <div class="chat-header">
             <h2>Spring WebSocket</h2>
+            <button id="logoutBtn" class="logout">Logout</button>
         </div>
         <div class="connecting">
             Connecting...
@@ -55,9 +56,9 @@
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const authMessage = document.getElementById('authMessage');
-
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     const showMessage = (msg, isError = true) => {
         authMessage.textContent = msg;
@@ -67,7 +68,7 @@
     const sendAuthRequest = async (endpoint) => {
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
-        if (!username || !password) return showMessage("Enter username and password");
+        if (!username || !password) return showMessage("Введите имя и пароль");
 
         try {
             const response = await fetch(`/api/auth/${endpoint}`, {
@@ -88,9 +89,8 @@
                 document.getElementById('auth-page').classList.add('hidden');
                 document.getElementById('chat-page').classList.remove('hidden');
                 connect();
-
             } else {
-                showMessage("Register success", false);
+                showMessage("Регистрация успешна. Теперь войдите", false);
             }
         } catch (err) {
             showMessage(err.message);
@@ -105,6 +105,13 @@
     registerBtn.onclick = (e) => {
         e.preventDefault();
         sendAuthRequest('register');
+    };
+
+    logoutBtn.onclick = () => {
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('username');
+        document.getElementById('chat-page').classList.add('hidden');
+        document.getElementById('auth-page').classList.remove('hidden');
     };
 </script>
 

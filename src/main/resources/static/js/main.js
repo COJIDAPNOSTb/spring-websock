@@ -24,11 +24,11 @@ function connect() {
         return;
     }
 
-    // Отключим старый клиент, если был
+
     if (stompClient && stompClient.connected) {
         stompClient.disconnect(() => {
             console.log("Previous WebSocket connection closed.");
-            doConnect(); // делаем новое подключение
+            doConnect();
         });
     } else {
         doConnect();

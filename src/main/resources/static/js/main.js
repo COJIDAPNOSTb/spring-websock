@@ -1,7 +1,5 @@
 'use strict';
 
-var usernamePage = document.querySelector('#username-page');
-var chatPage = document.querySelector('#chat-page');
 
 var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');

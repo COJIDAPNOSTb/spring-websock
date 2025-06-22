@@ -1,0 +1,30 @@
+services:
+  spring-websocket:
+    image: spring-websocket:latest
+    build: .
+    restart: "no"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/chatspringwebsocket
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123qwe
+    ports:
+      - "8081:8080"
+  postgres:
+    image: postgres:17.5
+    restart: "no"
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123qwe
+      POSTGRES_DB: chatspringwebsocket
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+volumes:
+  postgres_data:

@@ -1,6 +1,5 @@
 'use strict';
 
-
 var messageForm = document.querySelector('#messageForm');
 var messageInput = document.querySelector('#message');
 var messageArea = document.querySelector('#messageArea');
@@ -14,7 +13,7 @@ var colors = [
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
 
-function connect() {
+async function initializeChat() {
     username = localStorage.getItem('username');
 
     if (!username) {
@@ -22,7 +21,12 @@ function connect() {
         return;
     }
 
+    await loadChatHistory();
 
+    connect();
+}
+
+function connect() {
     if (stompClient && stompClient.connected) {
         stompClient.disconnect(() => {
             console.log("Previous WebSocket connection closed.");
@@ -39,7 +43,6 @@ function doConnect() {
     stompClient.connect({}, onConnected, onError);
 }
 
-
 function onConnected() {
     stompClient.subscribe('/topic/public', onMessageReceived);
     stompClient.send("/app/chat.addUser",
@@ -49,12 +52,10 @@ function onConnected() {
     connectingElement.classList.add('hidden');
 }
 
-
 function onError(error) {
     connectingElement.textContent = 'Could not connect to WebSocket server. Please refresh this page to try again!';
     connectingElement.style.color = 'red';
 }
-
 
 function sendMessage(event) {
     var messageContent = messageInput.value.trim();
@@ -70,10 +71,12 @@ function sendMessage(event) {
     event.preventDefault();
 }
 
-
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
+    displayMessage(message);
+}
 
+function displayMessage(message) {
     var messageElement = document.createElement('li');
 
     if(message.type === 'JOIN') {
@@ -108,7 +111,6 @@ function onMessageReceived(payload) {
     messageArea.scrollTop = messageArea.scrollHeight;
 }
 
-
 function getAvatarColor(messageSender) {
     var hash = 0;
     for (var i = 0; i < messageSender.length; i++) {
@@ -118,5 +120,28 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
+async function loadChatHistory() {try {
+    const response = await fetch('/api/messages');
+    if (!response.ok) {
+        throw new Error('HTTP error! status: ${response.status}');
+    }
+    const messages = await response.json();
 
-messageForm.addEventListener('submit', sendMessage, true)
+    messages.forEach(message => {
+
+        if (message.type === 'CHAT') {
+            displayMessage(message);
+        }
+    });
+
+    console.log('Загружено ${messages.length} сообщений из истории');
+} catch (error) {
+    console.error('Ошибка загрузки истории сообщений:', error);
+}
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChat();
+});
+
+messageForm.addEventListener('submit', sendMessage, true);

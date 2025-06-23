@@ -1,5 +1,6 @@
 package org.example.springwebsocket.app.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
@@ -8,10 +9,14 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Entity
+@Table(name = "chat_messages")
 public class ChatMessage {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long Id;
     private String content;
     private String sender;
     private MessageType type;
-    private Instant timestamp;
+    private Instant timestamp = Instant.now();
 }

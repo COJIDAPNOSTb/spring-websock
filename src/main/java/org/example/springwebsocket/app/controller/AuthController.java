@@ -9,6 +9,7 @@ import org.example.springwebsocket.app.model.dto.AuthResponse;
 import org.example.springwebsocket.app.repository.UserRepository;
 
 import org.example.springwebsocket.app.security.JwtUtil;
+import org.example.springwebsocket.app.service.AuthenticationService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,11 +19,12 @@ import java.util.Collections;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
+	
+	private final AuthenticationService authenticationService;
     private final UserRepository userRepo;
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtil;
-
+    
     @PostMapping("/register")
     public String register(@RequestBody AuthRequest request) {
         if (userRepo.existsByUsername(request.getUsername())) {
@@ -44,6 +46,7 @@ public class AuthController {
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
+        authenticationService.authentication( request );
         String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponse(token);
     }

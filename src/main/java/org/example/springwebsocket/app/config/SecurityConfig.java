@@ -1,5 +1,6 @@
 package org.example.springwebsocket.app.config;
 
+import lombok.RequiredArgsConstructor;
 import org.example.springwebsocket.app.handler.CustomAccessDeniedHandler;
 import org.example.springwebsocket.app.handler.CustomLogoutHandler;
 import org.example.springwebsocket.app.security.JwtFilter;
@@ -60,7 +61,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->{
-                        auth.requestMatchers("/index.html","/css/**","/js/**","/ws","/").permitAll();
+                        auth.requestMatchers("/index.html","/css/**","/js/**","/ws/**","/").permitAll();
                         auth.requestMatchers("/api/auth/**").permitAll();
                         auth.anyRequest().authenticated();
                 }

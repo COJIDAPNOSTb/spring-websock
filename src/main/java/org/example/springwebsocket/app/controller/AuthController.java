@@ -10,6 +10,8 @@ import org.example.springwebsocket.app.repository.UserRepository;
 
 import org.example.springwebsocket.app.security.JwtUtil;
 import org.example.springwebsocket.app.service.AuthenticationService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +48,10 @@ public class AuthController {
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
-        authenticationService.authentication( request );
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = authenticationService.authentication( request );
+//        String token = jwtUtil.generateToken(user.getUsername());
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//    	System.out.println( authentication.toString() );
         return new AuthResponse(token);
     }
 }

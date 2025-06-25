@@ -6,11 +6,13 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import org.example.springwebsocket.app.model.Token;
 import org.example.springwebsocket.app.repository.TokenRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Optional;
 
 import javax.crypto.SecretKey;
 
@@ -43,13 +45,14 @@ public class JwtUtil {
     public String extractUsername(String token) {
     	
     	JwtParserBuilder parser = Jwts.parserBuilder();
-    	
+    	parser.setSigningKey( getSigningKey() );
         return parser.build().parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
         	JwtParserBuilder parser = Jwts.parserBuilder();
+        	parser.setSigningKey( getSigningKey() );
             parser.build().parseClaimsJws(token);
             return true;
         } catch (JwtException ex) {
@@ -59,7 +62,7 @@ public class JwtUtil {
     
     private Date extractExpiration(String token) {
     	JwtParserBuilder parser = Jwts.parserBuilder();
-    	
+    	parser.setSigningKey( getSigningKey() );
         return parser.build().parseClaimsJws(token).getBody().getExpiration();
 	}
     
@@ -70,10 +73,9 @@ public class JwtUtil {
 	public boolean isValid(String token, UserDetails user) {
 		
 		String username = extractUsername( token );
-		
 		boolean isValidToken = tokenRepository.findByAccessToken( token )
-				.map(t -> t.isLoggedOut()).orElse( false );
-		
+				.map(t -> !t.isLoggedOut()).orElse( false );
+		System.out.println( isValidToken );
 		return username.equals(user.getUsername())
 				&& isAccessTokenExpired( token )
 				&& isValidToken;

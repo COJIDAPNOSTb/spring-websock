@@ -60,20 +60,12 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->{
-                        auth.requestMatchers("/index.html","/css/**","/js/**","/ws","/").permitAll();
+                        auth.requestMatchers("/index.html","/css/**","/js/**","/ws/**","/topic/**","/app/**","/").permitAll();
+                        
                         auth.requestMatchers("/api/auth/**").permitAll();
                         auth.anyRequest().authenticated();
                 }
                 )
-                .formLogin(form -> form
-        				.loginPage("/")
-        				.loginProcessingUrl("/login")
-        				.usernameParameter("username")
-        				.passwordParameter("password")
-        				.defaultSuccessUrl("/readMessage")
-        				.failureUrl("/login?error=true")
-        				.permitAll()
-        		)
                 .userDetailsService( userService )
         		.exceptionHandling(e ->{
         		e.accessDeniedHandler( accessDeniedHandler );

@@ -23,7 +23,7 @@ public class AuthenticationService {
 	
 	private final TokenRepository tokenRepo;
 	
-	private final JwtUtil jwtService;
+	private final JwtUtil jwtUtil;
 	
 	private final PasswordEncoder passwordEncoder;
 	
@@ -31,13 +31,13 @@ public class AuthenticationService {
 	
 	public AuthenticationService(UserRepository userRepo,
 								TokenRepository tokenRepo, 
-								JwtUtil jwtService,
+								JwtUtil jwtUtil,
 								PasswordEncoder passwordEncoder,
 								AuthenticationManager authenticationManager) {
 		this.userRepo = userRepo;
 		this.tokenRepo = tokenRepo;
 		this.authenticationManager = authenticationManager;
-		this.jwtService = jwtService;
+		this.jwtUtil = jwtUtil;
 		this.passwordEncoder = passwordEncoder;
 	}
 	
@@ -63,10 +63,9 @@ public class AuthenticationService {
 		token.setLoggedOut( false );
 		token.setUser( user );
 		tokenRepo.save(token);
-		System.out.println( tokenRepo.findAll());
 	}
 	
-	public AuthResponse authentication(AuthRequest request) {
+	public String authentication(AuthRequest request) {
 		authenticationManager.authenticate(
 			new UsernamePasswordAuthenticationToken( 
 					request.getUsername(),
@@ -74,12 +73,11 @@ public class AuthenticationService {
 				)
 			);
 		User user = userRepo.findByUsername( request.getUsername() ).orElseThrow();
-		
-		String accessToken = jwtService.generateToken( user.getUsername() );
+		String accessToken = jwtUtil.generateToken( user.getUsername() );
 		revokeAll( user );
 		saveUserToken( user, accessToken);
-		
-		return new AuthResponse( accessToken);
+		tokenRepo.deleteAll();
+		return  accessToken;
 	}
 	
 }

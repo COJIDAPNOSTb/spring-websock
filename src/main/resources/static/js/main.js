@@ -28,22 +28,37 @@ async function initializeChat() {
 
 function connect() {
     if (stompClient && stompClient.connected) {
-        stompClient.disconnect(() => {
-            console.log("Previous WebSocket connection closed.");
-            doConnect();
-        });
+        //stompClient.disconnect(() => {
+            //console.log("Previous WebSocket connection closed.");
+            //doConnect();
+			return;
+        //});
     } else {
         doConnect();
+		console.log("1234567890")
     }
 }
 
 function doConnect() {
-    const socket = new SockJS('/ws');
+	const jwt = localStorage.getItem("jwt")
+	if(!jwt){
+		console.error("jwt not found")
+		return;
+	}
+	
+    const socket = new SockJS("http://localhost:8081/ws");
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, onConnected, onError);
+    stompClient.connect(
+		{
+			'Authorization': `Bearer ${jwt}`,
+			'X-Requested-With':'XMLHttpRequest'
+		},
+	onConnected, onError);
+	
 }
 
 function onConnected() {
+	console.log("sdcfvgbhnm,.90")
     stompClient.subscribe('/topic/public', onMessageReceived);
     stompClient.send("/app/chat.addUser",
         {},
@@ -122,7 +137,13 @@ function getAvatarColor(messageSender) {
 }
 
 async function loadChatHistory() {try {
-    const response = await fetch('/api/messages');
+	const jwt = localStorage.getItem("jwt")
+    const response = await fetch('/api/messages',	
+			{
+				method: 'GET',
+				headers:{'Authorization':`Bearer ${jwt}`}
+			});
+	
     if (!response.ok) {
         throw new Error('HTTP error! status: ${response.status}');
     }

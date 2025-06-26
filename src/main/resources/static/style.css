@@ -1,0 +1,32 @@
+body {
+  font-family: sans-serif;
+  padding: 2em;
+  background: #f8f8f8;
+}
+
+.hidden {
+  display: none;
+}
+
+form {
+  margin-top: 1em;
+}
+
+input {
+  padding: 0.5em;
+  margin: 0.25em;
+}
+
+#messages {
+  list-style: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#messages li {
+  background: #fff;
+  margin: 0.5em 0;
+  padding: 0.5em;
+  border: 1px solid #ddd;
+}

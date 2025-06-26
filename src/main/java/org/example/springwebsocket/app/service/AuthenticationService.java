@@ -76,7 +76,6 @@ public class AuthenticationService {
 		String accessToken = jwtUtil.generateToken( user.getUsername() );
 		revokeAll( user );
 		saveUserToken( user, accessToken);
-		tokenRepo.deleteAll();
 		return  accessToken;
 	}
 	

@@ -55,7 +55,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     				if(!jwtUtil.isValid( token, details )) {
     					throw new MessagingException( "Invalid token" );
     				}
-    				System.out.println( "ого кто туту у нас" );
+
     				accessor.setUser( ()-> username );
     			}
     			

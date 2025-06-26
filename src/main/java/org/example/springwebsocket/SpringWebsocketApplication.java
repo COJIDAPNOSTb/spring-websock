@@ -9,5 +9,5 @@ public class SpringWebsocketApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringWebsocketApplication.class, args);
     }
-//version 1.0
+//version 1.1
 }

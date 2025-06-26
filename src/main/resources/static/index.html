@@ -1,122 +1,358 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <title>Spring Boot WebSocket Chat Application</title>
-    <link rel="stylesheet" href="/css/main.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - LOGIN </title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 50px auto; padding: 20px; }
+        .auth-form, .chat-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .error { color: red; margin-top: 10px; }
+        .success { color: green; margin-top: 10px; }
+        .hidden { display: none; }
+        .chat-header { display: flex; justify-content: between; align-items: center; margin-bottom: 20px; }
+        .chat-messages { height: 400px; border: 1px solid #ddd; padding: 15px; overflow-y: auto; margin-bottom: 20px; background: #fafafa; }
+        .message { margin-bottom: 10px; padding: 8px; border-radius: 4px; }
+        .message.join { background: #e8f5e8; color: #2d5a2d; }
+        .message.leave { background: #ffe8e8; color: #5a2d2d; }
+        .message.chat { background: #e8f4ff; }
+        .message-form { display: flex; gap: 10px; }
+        .message-input { flex: 1; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background: #f8f9fa; border: 1px solid #ddd; cursor: pointer; }
+        .tab.active { background: #007bff; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
 </head>
 <body>
-<noscript>
-    <h2>Your browser doesn't support Javascript</h2>
-</noscript>
+<div class="container">
+    <div id="authSection">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('login')">LOGIN</div>
+            <div class="tab" onclick="switchTab('register')">REGISTER</div>
+        </div>
 
-<div id="auth-page">
-    <div class="auth-container">
-        <h1 class="title">Login or Register</h1>
-        <form id="authForm">
-            <div class="form-group">
-                <input type="text" id="username" placeholder="Username" autocomplete="off" class="form-control" required />
+        <div id="loginTab" class="tab-content active">
+            <div class="auth-form">
+                <h2>Enter the chat</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginUsername">Username:</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit">ENTER</button>
+                    <div id="loginError" class="error"></div>
+                </form>
             </div>
-            <div class="form-group">
-                <input type="password" id="password" placeholder="Password" class="form-control" required />
+        </div>
+
+        <div id="registerTab" class="tab-content">
+            <div class="auth-form">
+                <h2>REGISTER-FORM</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerUsername">USERNAME:</label>
+                        <input type="text" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">PASSWORD:</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <button type="submit">REGISTER</button>
+                    <div id="registerError" class="error"></div>
+                    <div id="registerSuccess" class="success"></div>
+                </form>
             </div>
-            <div class="form-group">
-                <button type="submit" id="loginBtn" class="accent">Login</button>
-                <button type="button" id="registerBtn" class="primary">Register</button>
-            </div>
-            <div class="form-group">
-                <p id="authMessage" class="error"></p>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
 
-<div id="chat-page" class="hidden">
-    <div class="chat-container">
-        <div class="chat-header">
-            <h2>Spring WebSocket</h2>
-            <button id="logoutBtn" class="logout">Logout</button>
-        </div>
-        <div class="connecting">
-            Connecting...
-        </div>
-        <ul id="messageArea"></ul>
-        <form id="messageForm" name="messageForm">
-            <div class="form-group">
-                <div class="input-group clearfix">
-                    <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
-                    <button type="submit" class="primary">Send</button>
+    <div id="chatSection" class="hidden">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>Chat</h2>
+                <div>
+                    <span id="currentUser"></span>
+                    <button onclick="logout()">Выйти</button>
                 </div>
             </div>
-        </form>
+            <div id="chatMessages" class="chat-messages"></div>
+            <form id="messageForm" class="message-form">
+                <input type="text" id="messageInput" class="message-input" placeholder="Введите сообщение..." required>
+                <button type="submit">SUBMIT</button>
+            </form>
+        </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
 <script>
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const authMessage = document.getElementById('authMessage');
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
+    let stompClient = null;
+    let currentToken = null;
+    let currentUsername = null;
 
-    const showMessage = (msg, isError = true) => {
-        authMessage.textContent = msg;
-        authMessage.style.color = isError ? 'red' : 'green';
-    };
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-    const sendAuthRequest = async (endpoint) => {
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value;
-        if (!username || !password) return showMessage("Введите имя и пароль");
+        document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+        document.getElementById(tabName + 'Tab').classList.add('active');
+
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('registerError').textContent = '';
+        document.getElementById('registerSuccess').textContent = '';
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
 
         try {
-            const response = await fetch(`/api/auth/${endpoint}`, {
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ username, password })
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || "Ошибка запроса");
-            }
-
-            if (endpoint === 'login') {
-                const data = await response.json();
-                localStorage.setItem('jwt', data.token);
-                localStorage.setItem('username', username);
-                document.getElementById('auth-page').classList.add('hidden');
-                document.getElementById('chat-page').classList.remove('hidden');
-                connect();
+            if (response.ok) {
+                document.getElementById('registerSuccess').textContent = 'Регистрация успешна! Теперь войдите в систему.';
+                document.getElementById('registerError').textContent = '';
+                document.getElementById('registerForm').reset();
+                setTimeout(() => switchTab('login'), 2000);
             } else {
-                showMessage("Регистрация успешна. Теперь войдите", false);
+                const error = await response.text();
+                document.getElementById('registerError').textContent = error || 'Ошибка регистрации';
+                document.getElementById('registerSuccess').textContent = '';
             }
-        } catch (err) {
-            showMessage(err.message);
+        } catch (error) {
+            document.getElementById('registerError').textContent = 'Ошибка соединения';
+            document.getElementById('registerSuccess').textContent = '';
         }
-    };
+    });
 
-    loginBtn.onclick = (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        sendAuthRequest('login');
-    };
 
-    registerBtn.onclick = (e) => {
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                currentToken = data.token;
+                currentUsername = username;
+
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('chatSection').classList.remove('hidden');
+                document.getElementById('currentUser').textContent = `USER: ${username}`;
+
+                connectToChat();
+            } else {
+                const error = await response.text();
+                document.getElementById('loginError').textContent = error || 'INCORRECT DATA';
+            }
+        } catch (error) {
+            document.getElementById('loginError').textContent = 'CONNECTION ERROR';
+        }
+    });
+
+    function connectToChat() {
+        loadChatHistory();
+
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.debug = null;
+
+        const headers = {
+            'Authorization': `Bearer ${currentToken}`
+        };
+
+        stompClient.connect(headers,
+            function(frame) {
+                console.log('Connected: ' + frame);
+
+                stompClient.subscribe('/topic/public', function(message) {
+                    const chatMessage = JSON.parse(message.body);
+                    displayMessage(chatMessage);
+                });
+
+                stompClient.send('/app/chat.addUser', {}, JSON.stringify({
+                    sender: currentUsername,
+                    type: 'JOIN'
+                }));
+            },
+            function(error) {
+                console.error('WebSocket connection error:', error);
+                addSystemMessage('WEBSOCKET ERROR');
+            }
+        );
+    }
+
+    async function loadChatHistory() {
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const messages = await response.json();
+                const messagesDiv = document.getElementById('chatMessages');
+                messagesDiv.innerHTML = '';
+                messages.forEach(message => {
+                    displayHistoryMessage(message);
+                });
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } else {
+                console.error('Failed to load chat history');
+                addSystemMessage('LOAD CHAT HISTORY HAS FAILED');
+            }
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+            addSystemMessage('ERROR LOADING CHAT HISTORY');
+        }
+    }
+
+    document.getElementById('messageForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        sendAuthRequest('register');
-    };
 
-    logoutBtn.onclick = () => {
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('username');
-        document.getElementById('chat-page').classList.add('hidden');
-        document.getElementById('auth-page').classList.remove('hidden');
-    };
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+
+        if (content && stompClient) {
+            const chatMessage = {
+                sender: currentUsername,
+                content: content,
+                type: 'CHAT'
+            };
+
+            stompClient.send('/app/chat.sendMessage', {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+        }
+    });
+
+    function displayHistoryMessage(message) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+
+        if (message.type === 'CHAT' || !message.type) {
+            messageElement.classList.add('chat');
+
+            let timeStr = '';
+            if (message.timestamp) {
+                const date = new Date(message.timestamp);
+                timeStr = ` <small style="color: #666;">(${date.toLocaleTimeString()})</small>`;
+            }
+
+            const messageContent = `<strong>${message.sender}:</strong> ${message.content}${timeStr}`;
+            messageElement.innerHTML = messageContent;
+            messagesDiv.appendChild(messageElement);
+        }
+    }
+
+    function displayMessage(message) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+
+        let messageContent = '';
+        const currentTime = new Date();
+        const timeStr = ` <small style="color: #666;">(${currentTime.toLocaleTimeString()})</small>`;
+
+        switch(message.type) {
+            case 'JOIN':
+                messageElement.classList.add('join');
+                messageContent = `${message.sender} has joined${timeStr}`;
+                break;
+            case 'LEAVE':
+                messageElement.classList.add('leave');
+                messageContent = `${message.sender} is left${timeStr}`;
+                break;
+            case 'CHAT':
+                messageElement.classList.add('chat');
+                messageContent = `<strong>${message.sender}:</strong> ${message.content}${timeStr}`;
+                break;
+        }
+
+        messageElement.innerHTML = messageContent;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function addSystemMessage(text) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.style.color = 'red';
+        const currentTime = new Date();
+        const timeStr = ` (${currentTime.toLocaleTimeString()})`;
+        messageElement.innerHTML = `${text} <small style="color: #666;">${timeStr}</small>`;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function logout() {
+        if (stompClient) {
+            stompClient.send('/app/chat.addUser', {}, JSON.stringify({
+                sender: currentUsername,
+                type: 'LEAVE'
+            }));
+
+            stompClient.disconnect();
+            stompClient = null;
+        }
+
+        currentToken = null;
+        currentUsername = null;
+
+        document.getElementById('chatSection').classList.add('hidden');
+        document.getElementById('authSection').classList.remove('hidden');
+
+        document.getElementById('loginForm').reset();
+        document.getElementById('chatMessages').innerHTML = '';
+
+        document.getElementById('loginError').textContent = '';
+    }
+
+    window.addEventListener('beforeunload', function() {
+        if (stompClient && currentUsername) {
+            stompClient.send('/app/chat.addUser', {}, JSON.stringify({
+                sender: currentUsername,
+                type: 'LEAVE'
+            }));
+        }
+    });
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-<script src="/js/main.js"></script>
 </body>
 </html>

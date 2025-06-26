@@ -39,21 +39,21 @@ public class JwtFilter extends OncePerRequestFilter{
 			return;
 		}
 		String token = authHeader.substring( 7 );
-		System.out.println( token );
-		System.out.println( "это я фильтер" );
+
 		String username = jwtUtil.extractUsername( token );
 		
 		if(username!=null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = userService.loadUserByUsername( username );
-			System.out.println( "это снова я фильтер" );
+
 			if(jwtUtil.isValid( token, userDetails )) {
 				UsernamePasswordAuthenticationToken authtoken = new UsernamePasswordAuthenticationToken(
 						userDetails,null,userDetails.getAuthorities());
 				authtoken.setDetails( new WebAuthenticationDetailsSource().buildDetails( request ) );
-				System.out.println( "и это опять я фильтер" );
+
 				SecurityContextHolder.getContext().setAuthentication( authtoken );
 				System.out.println( authtoken );
-			}else System.out.println( "что то пошло не так" );
+			}
+			else System.out.println("Failed validation: " + token + " Requeries: " +userDetails.getUsername() );
 			
 		}else System.out.println( "1234567890-pl,mnbvcdswertyjm vcxdsdertghjnm vcxsdfghjnm xzsdfghn xaserfghbn " );
 		filterChain.doFilter( request, response );

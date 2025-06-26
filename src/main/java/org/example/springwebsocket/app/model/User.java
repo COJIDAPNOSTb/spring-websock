@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.Fetch;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,7 +31,8 @@ public class User implements UserDetails{
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> roles;
     
-	@OneToMany(mappedBy = "user")
+	@OneToMany(mappedBy = "user" , fetch = FetchType.EAGER)
+
 	private List<Token> tokens;
 
 	@Override

@@ -13,7 +13,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/messages")
 public class ChatMessageController {
+
     private final ChatMessageService chatMessageService;
+
     @GetMapping
     public List<ChatMessage>getChatMessages() {
         return chatMessageService.findAll();

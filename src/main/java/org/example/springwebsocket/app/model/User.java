@@ -25,15 +25,17 @@ public class User implements UserDetails{
 
     @Column(unique = true)
     private String username;
-
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> roles;
     
 	@OneToMany(mappedBy = "user" , fetch = FetchType.EAGER)
-
 	private List<Token> tokens;
+
+
+
+
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

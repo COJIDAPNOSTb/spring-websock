@@ -1,26 +1,18 @@
 package org.example.springwebsocket.app.security;
 
-
-
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-
-import org.example.springwebsocket.app.model.Token;
 import org.example.springwebsocket.app.repository.TokenRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import java.util.Date;
-import java.util.Optional;
-
 import javax.crypto.SecretKey;
 
 @Component
 public class JwtUtil {
     private final String secret = "superSecretKeyqw4teyrtyuljhgnfdsfdeqwrretryy";
     private final long expirationMs = 86400000;
-    
     private final TokenRepository tokenRepository;
     
     public JwtUtil(TokenRepository tokenRepository) {
@@ -29,7 +21,6 @@ public class JwtUtil {
     
     private SecretKey getSigningKey() {
     	byte[] keyBytes = Decoders.BASE64URL.decode( secret );
-    	
     	return Keys.hmacShaKeyFor( keyBytes );
     }
     

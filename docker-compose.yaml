@@ -1,4 +1,6 @@
 services:
+
+
   spring-websocket:
     image: spring-websocket:latest
     build: .
@@ -9,6 +11,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: 123qwe
     ports:
       - "8081:8080"
+
+
   postgres:
     image: postgres:17.5
     restart: "no"
@@ -27,6 +31,7 @@ services:
       start_period: 10s
       retries: 5
 
+
   prometheus:
     image: prom/prometheus:v3.4.2
     restart: "no"
@@ -37,13 +42,14 @@ services:
       - "9091:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy
       interval: 10s
       timeout: 5s
       start_period: 10s
       retries: 5
+
+
   grafana:
     image: grafana/grafana:12.0.2
     restart: "no"
@@ -59,5 +65,7 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 5
+
+
 volumes:
   postgres_data:

@@ -27,6 +27,7 @@ public class CustomLogoutHandler implements LogoutHandler{
 		if(authHeader == null || authHeader.startsWith("Bearer ")) {
 			return;
 		}
+
 		String token = authHeader.substring( 7 );
 		Token tokenEntity = tokenRepository.findByAccessToken( token ).orElse( null );
 		

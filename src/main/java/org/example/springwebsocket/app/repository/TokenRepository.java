@@ -10,16 +10,13 @@ import org.springframework.data.repository.query.Param;
 
 
 public interface TokenRepository extends JpaRepository<Token, Long>{
-	
-	Optional<Token> findByAccessToken(String accessToken);
 
-    //Optional<Token> findByRefreshToken(String refreshToken);
-	
+    Optional<Token> findByAccessToken(String accessToken);
+
     @Query("""
             SELECT t FROM Token t inner join User u
             on t.user.id = u.id
             where t.user.id = :userId and t.loggedOut = false
             """)
-
     List<Token> findAllAccessTokenByUser(@Param("userId") Long userId);
 }

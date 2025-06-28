@@ -32,12 +32,14 @@ public class AuthController {
         if (userRepo.existsByUsername(request.getUsername())) {
             throw new RuntimeException("User already exists");
         }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .password(encoder.encode(request.getPassword()))
                 .roles(Collections.singleton("USER"))
                 .build();
         userRepo.save(user);
+
         return "User registered";
     }
 
@@ -45,13 +47,12 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest request) {
         User user = userRepo.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (!encoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
+
         String token = authenticationService.authentication( request );
-//        String token = jwtUtil.generateToken(user.getUsername());
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//    	System.out.println( authentication.toString() );
         return new AuthResponse(token);
     }
 }

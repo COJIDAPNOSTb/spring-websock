@@ -17,16 +17,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
-	
 
 	private final UserRepository userRepo;
-	
 	private final TokenRepository tokenRepo;
-	
 	private final JwtUtil jwtUtil;
-	
 	private final PasswordEncoder passwordEncoder;
-	
 	private final AuthenticationManager authenticationManager;
 	
 	public AuthenticationService(UserRepository userRepo,
@@ -41,13 +36,7 @@ public class AuthenticationService {
 		this.passwordEncoder = passwordEncoder;
 	}
 	
-//	public void register(AuthRequest request) {
-//		User user = new User();
-//		user.setUsername( request.getUsername() );
-//		user.setPassword( passwordEncoder.encode(request.getPassword()));
-//		user.setRole( Collections.singleton("USER") );
-//		user = userRepo.save( user );
-//	}
+
 	
 	private void revokeAll(User user) {
 		List<Token> validToken = tokenRepo.findAllAccessTokenByUser( user.getId() );

@@ -12,9 +12,11 @@ public class UserServiceImpl implements UserService{
 	private final UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+		this.userRepository = userRepository;
     }
-	
+
+
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return userRepository.findByUsername( username )
@@ -23,19 +25,14 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public boolean existsByUsername(String username) {
-		User user = userRepository.findByUsername( username ).orElse( null );
+		User user = userRepository.findByUsername(username).orElse( null );
 		if(user != null) {
 			return true;
 		}
+
+
 		return false;
 	}
 
-//	@Override
-//	public boolean existsByEmail(String email) {
-//		User user = userRepository.findByEmail( email ).orElse( null );
-//		if(user != null) {
-//			return true;
-//		}
-//		return false;
-//	}
+
 }

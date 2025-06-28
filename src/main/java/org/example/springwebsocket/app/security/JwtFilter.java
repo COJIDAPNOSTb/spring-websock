@@ -38,8 +38,8 @@ public class JwtFilter extends OncePerRequestFilter{
 			filterChain.doFilter( request, response );
 			return;
 		}
-		String token = authHeader.substring( 7 );
 
+		String token = authHeader.substring( 7 );
 		String username = jwtUtil.extractUsername( token );
 		
 		if(username!=null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -53,9 +53,10 @@ public class JwtFilter extends OncePerRequestFilter{
 				SecurityContextHolder.getContext().setAuthentication( authtoken );
 				System.out.println( authtoken );
 			}
+
 			else System.out.println("Failed validation: " + token + " Requeries: " +userDetails.getUsername() );
 			
-		}else System.out.println( "1234567890-pl,mnbvcdswertyjm vcxdsdertghjnm vcxsdfghjnm xzsdfghn xaserfghbn " );
+		}
 		filterChain.doFilter( request, response );
 	}
 	

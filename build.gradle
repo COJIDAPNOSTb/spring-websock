@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.sonarqube" version "6.2.0.5505"
 }
 
 group = 'org.example'
@@ -10,6 +11,14 @@ version = '0.0.1-SNAPSHOT'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "spring-websocket"
+        property "sonar.projectName", "spring-websocket"
+        property "sonar.qualitygate.wait", true
     }
 }
 

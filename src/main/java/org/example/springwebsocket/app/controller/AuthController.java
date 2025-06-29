@@ -25,7 +25,7 @@ public class AuthController {
 	private final AuthenticationService authenticationService;
     private final UserRepository userRepo;
     private final PasswordEncoder encoder;
-    private final JwtUtil jwtUtil;
+    //private final JwtUtil jwtUtil;
     
     @PostMapping("/register")
     public String register(@RequestBody AuthRequest request) {
@@ -38,7 +38,8 @@ public class AuthController {
                 .roles(Collections.singleton("USER"))
                 .build();
         userRepo.save(user);
-        return "User registered";
+        String token = authenticationService.authentication( request );
+        return token;
     }
 
     @PostMapping("/login")

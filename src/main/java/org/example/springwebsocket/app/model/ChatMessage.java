@@ -9,6 +9,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+
 @Entity
 @Table(name = "chat_messages")
 public class ChatMessage {
@@ -18,5 +19,6 @@ public class ChatMessage {
     private String content;
     private String sender;
     private MessageType type;
+    @Builder.Default
     private Instant timestamp = Instant.now();
 }
